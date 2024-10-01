@@ -1,0 +1,25 @@
+name: Daily
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install global dependencies
+        run: |
+          npm install -g zx @tsed/cli
+
+      - name: Run script
+        run: npx zx tsed.mjs
