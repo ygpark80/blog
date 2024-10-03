@@ -1,0 +1,19 @@
+{
+  "name": "drizzle-introspect-schema",
+  "type": "module",
+  "scripts": {
+    "drizzle:transform:bananastand": "npx tsx drizzle.transform.ts bananastand",
+    "drizzle:transform:pizzaplanet": "npx tsx drizzle.transform.ts pizzaplanet",
+    "drizzle:pull:bananastand": "drizzle-kit introspect --config drizzle.config.bananastand.ts && yarn drizzle:transform:bananastand",
+    "drizzle:pull:pizzaplanet": "drizzle-kit introspect --config drizzle.config.pizzaplanet.ts && yarn drizzle:transform:pizzaplanet",
+    "drizzle:pull": "yarn drizzle:pull:bananastand && yarn drizzle:pull:pizzaplanet"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.33.0",
+    "mysql2": "^3.11.3"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.24.2",
+    "tsx": "^4.19.1"
+  }
+}

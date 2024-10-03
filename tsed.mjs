@@ -1,6 +1,6 @@
-await $`rm -rf myproject`
-await $`mkdir myproject`
-cd("myproject")
+try { await $`rm -rf dist/myproject` } catch {}
+await $`mkdir -p dist/myproject`
+cd("dist/myproject")
 
 await $`npx -p @tsed/cli tsed init --features swagger,testing,jest -s .`
 
