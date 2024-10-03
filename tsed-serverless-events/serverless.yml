@@ -1,0 +1,21 @@
+service: tsed-serverless-events
+
+provider:
+  name: aws
+
+functions:
+  handler:
+    handler: dist/lambda.handler
+    events:
+      - httpApi:
+          method: ANY
+          path: /
+      - httpApi:
+          method: ANY
+          path: /{proxy+}
+
+  sqs:
+    handler: dist/functions/sqs.handler
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-1:123456789012:MyQueue
