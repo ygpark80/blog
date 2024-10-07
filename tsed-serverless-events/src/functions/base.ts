@@ -17,10 +17,10 @@ export class Platform {
 	}
 }
 
-const sqs = new SQSClient({ region: "ap-southeast-2" })
+const sqs = new SQSClient()
 
 export class SQSProcessor {
-	static async handler<P>(process: (payload: P) => void): Promise<SQSHandler> {
+	static handler<P>(process: (payload: P) => void) {
 		const handler: SQSHandler = async (event: SQSEvent) => {
 			for (const record of event.Records) {
 				try {
@@ -29,9 +29,12 @@ export class SQSProcessor {
 					process(payload)
 
 					if (record.receiptHandle) {
+						const [region, accountId, queueName] = record.eventSourceARN.replace("arn:aws:sqs:", "").split(":")
+						const QueueUrl = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`
+						const sqs = new SQSClient({ region })
 						await sqs.send(
 							new DeleteMessageCommand({
-								QueueUrl: record.eventSourceARN,
+								QueueUrl,
 								ReceiptHandle: record.receiptHandle
 							})
 						)

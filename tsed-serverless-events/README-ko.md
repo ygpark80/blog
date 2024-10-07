@@ -213,7 +213,7 @@ SQS 이벤트를 처리할 때, 일반적으로 각 레코드를 순차적으로
 // src/functions/base.ts
 // ...
 export class SQSProcessor {
-	static async handler<P>(process: (payload: P) => void): Promise<SQSHandler> {
+	static handler<P>(process: (payload: P) => void) {
 		const handler: SQSHandler = async (event: SQSEvent) => {
 			for (const record of event.Records) {
 				try {
@@ -222,9 +222,12 @@ export class SQSProcessor {
 					process(payload)
 
 					if (record.receiptHandle) {
+						const [region, accountId, queueName] = record.eventSourceARN.replace("arn:aws:sqs:", "").split(":")
+						const QueueUrl = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`
+						const sqs = new SQSClient({ region })
 						await sqs.send(
 							new DeleteMessageCommand({
-								QueueUrl: record.eventSourceARN,
+								QueueUrl,
 								ReceiptHandle: record.receiptHandle
 							})
 						)
