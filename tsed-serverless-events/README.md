@@ -213,18 +213,20 @@ Let’s create an `SQSProcessor` class to handle this logic more efficiently:
 // src/functions/base.ts
 // ...
 export class SQSProcessor {
-	static handler<P>(process: (payload: P) => void) {
+	static handler<P>(process: (payload: P) => void | Promise<void>) {
 		const handler: SQSHandler = async (event: SQSEvent) => {
+			const region = event.Records[0]?.awsRegion
+			const sqs = new SQSClient({ region })
+
 			for (const record of event.Records) {
 				try {
 					const payload = JSON.parse(record.body) as P
 
-					process(payload)
+					await process(payload)
 
 					if (record.receiptHandle) {
-						const [region, accountId, queueName] = record.eventSourceARN.replace("arn:aws:sqs:", "").split(":")
+						const [, accountId, queueName] = record.eventSourceARN.replace("arn:aws:sqs:", "").split(":")
 						const QueueUrl = `https://sqs.${region}.amazonaws.com/${accountId}/${queueName}`
-						const sqs = new SQSClient({ region })
 						await sqs.send(
 							new DeleteMessageCommand({
 								QueueUrl,
