@@ -1,0 +1,75 @@
+service: service_name
+
+custom:
+  hostedZoneId: <hosted-zone-id>
+  certificateArn: <certificate-arn>
+  subnetIds:
+    - <subnet-id>
+    - <subnet-id>
+  securityGroupIds:
+    - <security-group-id>
+
+provider:
+  name: aws
+  region: <aws-region>
+  environment:
+    NODE_ENV: production
+  timeout: 900
+  ecr:
+    images:
+      service_name:
+        path: .
+        file: ./Dockerfile.lambda
+  vpc:
+    subnetIds: ${self:custom.subnetIds}
+    securityGroupIds: ${self:custom.securityGroupIds}
+
+plugins:
+  - serverless-dotenv-plugin
+
+resources:
+  Resources:
+    LambdaLoadBalancer:
+      Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+      Properties:
+        Name: ${self:service}-${opt:stage}-lb
+        # Scheme: internal
+        # Subnets: ${self:custom.subnetIds}
+        # SecurityGroups: ${self:custom.securityGroupIds}
+        Type: application
+    LambdaListener:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+        DefaultActions:
+          Type: "fixed-response"
+          FixedResponseConfig:
+            StatusCode: 404
+            ContentType: "application/json"
+            MessageBody: '{ "not": "found" }'
+        LoadBalancerArn: !Ref LambdaLoadBalancer
+        Port: 443
+        Protocol: HTTPS
+        Certificates:
+          - CertificateArn: ${self:custom.certificateArn}
+    Route53RecordSet:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: ${self:custom.hostedZoneId}
+        Name: <custom-domain-name>
+        Type: A
+        AliasTarget:
+          HostedZoneId: { "Fn::GetAtt": ["LambdaLoadBalancer", "CanonicalHostedZoneID"] }
+          DNSName: { "Fn::GetAtt": ["LambdaLoadBalancer", "DNSName"] }
+
+functions:
+  handler:
+    image:
+      name: <service-name>
+    timeout: 29
+    events:
+      - alb:
+          listenerArn: { Ref: LambdaListener }
+          targetGroupName: ${self:service}-${opt:stage}-tg
+          priority: 1
+          conditions:
+            path: /*
