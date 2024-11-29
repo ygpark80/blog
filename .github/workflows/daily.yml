@@ -19,6 +19,7 @@ jobs:
 
       - name: Install global dependencies
         run: |
+          corepack enable
           npm install -g zx
 
       - name: Run script
