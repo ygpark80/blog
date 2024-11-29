@@ -2,7 +2,7 @@ try { await $`rm -rf dist/myproject` } catch {}
 await $`mkdir -p dist/myproject`
 cd("dist/myproject")
 
-await $`npx -p @tsed/cli tsed init --features swagger,testing,jest -s .`
+await $`npx -p @tsed/cli@6.0.0 tsed init --features swagger,testing,jest -s .`
 
 await $`yarn build`
 
