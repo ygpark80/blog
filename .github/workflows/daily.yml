@@ -19,7 +19,9 @@ jobs:
 
       - name: Install global dependencies
         run: |
+          npm install -g corepack
           corepack enable
+          corepack prepare pnpm@latest --activate
           npm install -g zx
 
       - name: Run script
