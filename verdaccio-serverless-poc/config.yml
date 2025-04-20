@@ -1,0 +1,35 @@
+storage: /tmp/verdaccio
+
+store:
+  aws-s3-storage:
+    bucket: <bucket-name>
+    # keyPrefix:
+    # region:
+    # endpoint:
+    # accessKeyId:
+    # secretAccessKey:
+    s3ForcePathStyle: true
+
+auth:
+  htpasswd:
+    file: ./htpasswd
+    algorithm: bcrypt
+    max_users: -1
+
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+
+packages:
+  '@<private-scope>/*':
+    access: <username1>, <username2>, ...
+    publish: <username1>, <username2>, ...
+    proxy: npmjs
+    storage: <private-scope>
+  '**':
+    access: $all
+    publish:
+    proxy: npmjs
+    storage: public
+
+log: { type: stdout, format: pretty, level: http }

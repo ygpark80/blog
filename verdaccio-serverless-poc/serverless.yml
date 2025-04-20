@@ -1,0 +1,29 @@
+service: verdaccio
+
+provider:
+  name: aws
+  region: <your-aws-region>
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: npm.<your-domain>
+    certificateName: "<your-domain>"
+    createRoute53Record: false
+    createRoute53IPv6Record: false
+    endpointType: EDGE
+    apiType: rest
+    autoDomain: true
+
+functions:
+  app:
+    handler: dist/lambda.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
